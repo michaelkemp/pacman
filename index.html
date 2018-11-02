@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pacman</title>
+<style>
+body,html {
+    margin:10px;
+    padding:10px;
+	background-color:black;
+}
+#gameBoard {
+    display:block;
+    margin:0px auto;
+    width:448px;
+    height:576px;
+    background-color: black;
+}
+</style>
+<script src="jquery-2.1.4.min.js"></script>
+<script>
+$(document).ready(function() {
+    var sprites = new Array();
+    sprites.push( {name:"Game",			speed:10, show:0, count:2, images:[[448,0],[896,0]], width:448, height:576} );
+    sprites.push( {name:"Life",			speed:0, show:0, count:1, images:[[160,320]], width:40, height:40} );
+    sprites.push( {name:"Ready",		speed:0, show:0, count:1, images:[[0,540]], width:120, height:20} );
+    sprites.push( {name:"HiScore",		speed:0, show:0, count:1, images:[[0,520]], width:160, height:20} );
+    sprites.push( {name:"GameOver",		speed:0, show:0, count:1, images:[[0,380]], width:200, height:20} );
+    sprites.push( {name:"1UP",			speed:0, show:0, count:1, images:[[160,520]], width:80, height:20} );
+    sprites.push( {name:"2UP",			speed:0, show:0, count:1, images:[[160,540]], width:80, height:20} );
+	sprites.push( {name:"PacL", 		speed:5, show:0, count:4, images:[[0,0],  [40,0],  [0,0],  [80,0]], width:40, height:40} );
+    sprites.push( {name:"PacR",			speed:5, show:0, count:4, images:[[0,40], [40,40], [0,40], [80,0]], width:40, height:40} );
+    sprites.push( {name:"PacU",   		speed:5, show:0, count:4, images:[[0,80], [40,80], [0,80], [80,0]], width:40, height:40} );
+    sprites.push( {name:"PacD", 		speed:5, show:0, count:4, images:[[0,120],[40,120],[0,120],[80,0]], width:40, height:40} );
+    sprites.push( {name:"Death", 		speed:10, show:0, count:12, images:[[0,480],[40,480],[80,480],[120,480],[160,480],[200,480],[240,480],[280,480],[320,480],[360,480],[400,480],[400,520]], width:40, height:40} );
+    sprites.push( {name:"MSPacL", 		speed:5, show:0, count:4, images:[[160,0],  [200,0],  [160,0],  [240,0]], width:40, height:40} );
+    sprites.push( {name:"MSPacR",		speed:5, show:0, count:4, images:[[160,40], [200,40], [160,40], [240,40]], width:40, height:40} );
+    sprites.push( {name:"MSPacU",   	speed:5, show:0, count:4, images:[[160,80], [200,80], [160,80], [240,80]], width:40, height:40} );
+    sprites.push( {name:"MSPacD", 		speed:5, show:0, count:4, images:[[160,120],[200,120],[160,120],[240,120]], width:40, height:40} );
+    sprites.push( {name:"BlinkyU",    	speed:5, show:0, count:2, images:[[0,160],  [40,160]], width:40, height:40} );
+    sprites.push( {name:"BlinkyD",  	speed:5, show:0, count:2, images:[[80,160], [120,160]], width:40, height:40} );
+    sprites.push( {name:"BlinkyL",  	speed:5, show:0, count:2, images:[[160,160],[200,160]], width:40, height:40} );
+    sprites.push( {name:"BlinkyR", 		speed:5, show:0, count:2, images:[[240,160],[280,160]], width:40, height:40} );
+    sprites.push( {name:"BlinkyB",   	speed:5, show:0, count:2, images:[[0,320],   [40,320]], width:40, height:40} );
+    sprites.push( {name:"BlinkyW",  	speed:5, show:0, count:2, images:[[80,320], [120,320]], width:40, height:40} );
+    sprites.push( {name:"PinkyU",    	speed:5, show:0, count:2, images:[[0,200],   [40,200]], width:40, height:40} );
+    sprites.push( {name:"PinkyD",  		speed:5, show:0, count:2, images:[[80,200], [120,200]], width:40, height:40} );
+    sprites.push( {name:"PinkyL",  		speed:5, show:0, count:2, images:[[160,200],[200,200]], width:40, height:40} );
+    sprites.push( {name:"PinkyR", 		speed:5, show:0, count:2, images:[[240,200],[280,200]], width:40, height:40} );
+    sprites.push( {name:"PinkyB",   	speed:5, show:0, count:2, images:[[0,320],   [40,320]], width:40, height:40} );
+    sprites.push( {name:"PinkyW",  		speed:5, show:0, count:2, images:[[80,320], [120,320]], width:40, height:40} );
+    sprites.push( {name:"InkyU",    	speed:5, show:0, count:2, images:[[0,240],   [40,240]], width:40, height:40} );
+    sprites.push( {name:"InkyD",  		speed:5, show:0, count:2, images:[[80,240], [120,240]], width:40, height:40} );
+    sprites.push( {name:"InkyL",  		speed:5, show:0, count:2, images:[[160,240],[200,240]], width:40, height:40} );
+    sprites.push( {name:"InkyR", 		speed:5, show:0, count:2, images:[[240,240],[280,240]], width:40, height:40} );
+    sprites.push( {name:"InkyB",   		speed:5, show:0, count:2, images:[[0,320],   [40,320]], width:40, height:40} );
+    sprites.push( {name:"InkyW",  		speed:5, show:0, count:2, images:[[80,320], [120,320]], width:40, height:40} );
+    sprites.push( {name:"ClydeU",    	speed:5, show:0, count:2, images:[[0,280],   [40,280]], width:40, height:40} );
+    sprites.push( {name:"ClydeD",  		speed:5, show:0, count:2, images:[[80,280], [120,280]], width:40, height:40} );
+    sprites.push( {name:"ClydeL",  		speed:5, show:0, count:2, images:[[160,280],[200,280]], width:40, height:40} );
+    sprites.push( {name:"ClydeR", 		speed:5, show:0, count:2, images:[[240,280],[280,280]], width:40, height:40} );
+    sprites.push( {name:"ClydeB",   	speed:5, show:0, count:2, images:[[0,320],   [40,320]], width:40, height:40} );
+    sprites.push( {name:"ClydeW",  		speed:5, show:0, count:2, images:[[80,320], [120,320]], width:40, height:40} );
+    sprites.push( {name:"BlinkyEU",    	speed:0, show:0, count:1, images:[[0,400]], width:40, height:40} );
+    sprites.push( {name:"BlinkyED", 	speed:0, show:0, count:1, images:[[40,400]], width:40, height:40} );
+    sprites.push( {name:"BlinkyEL",		speed:0, show:0, count:1, images:[[80,400]], width:40, height:40} );
+    sprites.push( {name:"BlinkyER",		speed:0, show:0, count:1, images:[[120,400]], width:40, height:40} );    
+    sprites.push( {name:"PinkyEU",    	speed:0, show:0, count:1, images:[[0,400]], width:40, height:40} );
+    sprites.push( {name:"PinkyED", 		speed:0, show:0, count:1, images:[[40,400]], width:40, height:40} );
+    sprites.push( {name:"PinkyEL", 		speed:0, show:0, count:1, images:[[80,400]], width:40, height:40} );
+    sprites.push( {name:"PinkyER", 		speed:0, show:0, count:1, images:[[120,400]], width:40, height:40} );    
+    sprites.push( {name:"InkyEU",    	speed:0, show:0, count:1, images:[[0,400]], width:40, height:40} );
+    sprites.push( {name:"InkyED",  		speed:0, show:0, count:1, images:[[40,400]], width:40, height:40} );
+    sprites.push( {name:"InkyEL",  		speed:0, show:0, count:1, images:[[80,400]], width:40, height:40} );
+    sprites.push( {name:"InkyER", 		speed:0, show:0, count:1, images:[[120,400]], width:40, height:40} );    
+    sprites.push( {name:"ClydeEU",    	speed:0, show:0, count:1, images:[[0,400]], width:40, height:40} );
+    sprites.push( {name:"ClydeED", 		speed:0, show:0, count:1, images:[[40,400]], width:40, height:40} );
+    sprites.push( {name:"ClydeEL", 		speed:0, show:0, count:1, images:[[80,400]], width:40, height:40} );
+    sprites.push( {name:"ClydeER", 		speed:0, show:0, count:1, images:[[120,400]], width:40, height:40} );    
+    sprites.push( {name:"Digits", 		speed:0, show:0, count:10, images:[[20,360],[40,360],[60,360],[80,360],[100,360],[120,360],[140,360],[160,360],[180,360],[200,360]], width:20, height:20} );
+    sprites.push( {name:"Fruit", 		speed:0, show:0, count:8, images:[[240,320],[240,360],[240,400],[240,440],[280,320],[280,360],[280,400],[280,440]], width:40, height:40} );
+    sprites.push( {name:"FruitScores", 	speed:0, show:0, count:8, images:[[320,0],[320,40],[320,80],[320,120],[320,160],[320,200],[320,240],[320,280]], width:40, height:40} );
+    sprites.push( {name:"GhoScores", 	speed:0, show:0, count:4, images:[[0,440],[40,440],[80,440],[120,440]], width:40, height:40} );
+    sprites.push( {name:"PowerUp",		speed:12, show:0, count:2, images:[[0,360],[220,360]], width:20, height:20} );
+
+	function getImages(name) {
+		for(var i=0; i<sprites.length; ++i) {
+			if (sprites[i].name == name) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	// PACMAN OBJECT
+	function pacman(row,col,dir,turn,speed,sprite) {
+		this.row = row; // Current ROW Position of Pacman 
+		this.col = col; // Current COL Position of Pacman 
+		this.rowStep =  new Array(); // Small Steps between ROWs 
+		this.colStep =  new Array(); // Small Steps between COLs 
+		this.dir = dir;  // Pacman's Direction 4=LEFT; 1=UP; 2=RIGHT; 3=DOWN 
+		this.turn = turn; // Direction of Pacman's NEXT Direction 4=LEFT; 1=UP; 2=RIGHT; 3=DOWN 
+		this.speed = speed; // Pacman's Speed - Lower=Faster (actually the number of steps between each grid location
+		this.sprite = sprite; // Pacman's current sprite number in the sprite array - changes depending on direction
+		this.spX = -3;  // X offset of the Pacman Sprite
+		this.spY = 45;  // Y offset of the Pacman Sprite
+		this.alive = true;  // BOOLEAN - is Pacman alive or not
+	};
+
+	// GHOST OBJECT
+    function ghost(name,imageRow,row,col,dir,toRow,toCol,random,homeTime,out,speed,sprite) {
+        this.name = name;
+        this.row = row;
+        this.col = col;
+        this.imgRow = imageRow;
+        this.rowStep = new Array();
+        this.colStep = new Array();
+        this.dir = dir;
+        this.scout = true;
+        this.toCol = toCol;
+        this.toRow = toRow;
+        this.random = random;
+        this.speed = speed;
+		this.saveSpeed = speed;
+		this.sprite = sprite;
+		this.spX = -4;  // X offset of the GHOST Sprite
+		this.spY = 44;  // Y offset of the GHOST Sprite
+        this.homeTime = homeTime;
+        this.out = out;
+        this.runAway = false;
+        this.eaten = false;
+    }
+	
+	// GAME ARRAY 
+    var game = new Array();
+    game[0] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    game[1] = [0,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,0];
+    game[2] = [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[3] = [0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0];
+    game[4] = [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[5] = [0,2,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,2,0];
+    game[6] = [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[7] = [0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0];
+    game[8] = [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[9] = [0,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,0];
+    game[10]= [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[11]= [0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0];
+    game[12]= [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[13]= [0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0];
+    game[14]= [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[15]= [0,1,4,1,4,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,4,1,4,1,0];
+    game[16]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[17]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[18]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[19]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[20]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[21]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[22]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[23]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,4,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[24]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[25]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,4,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[26]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,4,0,0,0,4,0,0,0,4,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[27]= [4,4,4,4,4,4,4,4,4,4,4,1,4,4,4,4,4,4,0,0,0,0,4,5,5,5,4,5,5,5,4,0,0,0,0,4,4,4,4,4,4,1,4,4,4,4,4,4,4,4,4,4,4];
+    game[28]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,4,0,0,0,4,0,0,0,4,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[29]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[30]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[31]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[32]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[33]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[34]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[35]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[36]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[37]= [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0];
+    game[38]= [0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0];
+    game[39]= [0,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,0];
+    game[40]= [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[41]= [0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0];
+    game[42]= [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[43]= [0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0];
+    game[44]= [0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0];
+    game[45]= [0,2,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,4,1,4,1,4,1,4,4,4,4,4,1,4,1,4,1,4,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,2,0];
+    game[46]= [0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0];
+    game[47]= [0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0];
+    game[48]= [0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0];
+    game[49]= [0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0];
+    game[50]= [0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0];
+    game[51]= [0,1,4,1,4,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,0,0,0,0,0,1,4,1,4,1,4,1,4,1,4,1,0];
+    game[52]= [0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0];
+    game[53]= [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0];
+    game[54]= [0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0];
+    game[55]= [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0];
+    game[56]= [0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0];
+    game[57]= [0,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,0];
+    game[58]= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+
+    
+	// COPY OF GAME ARRAY - changed as dots are eaten
+    var grid = new Array();
+	for(var i=0; i<game.length; ++i) { grid[i] = game[i].slice(); }
+
+	// ============== GAME VARIABLES ==============
+	var RUN = true;
+    var GameOver = false;
+    var FPS = 60;
+    var dots = 244;
+    var intVar;
+	var Score1UP = 0;
+	var Score2UP = 0;
+	var HighScore = 0;
+	var startPause = true;
+	var pacObj = new Object();
+	var ghoObj = new Array();
+	var boardSprite = getImages("Game");
+	var digitSprite = getImages("Digits");
+	var readySprite = getImages("Ready");
+	var fruitSprite = getImages("Fruit");
+	var livesSprite = getImages("Life");
+	var gOverSprite = getImages("GameOver");
+	var hiScrSprite = getImages("HiScore");
+	var oneUpSprite = getImages("1UP");
+	var twoUpSprite = getImages("2UP");
+	var deathSprite = getImages("Death");
+	var powerSprite = getImages("PowerUp");
+    var powerTime;
+    var before = Date.now();
+    var fpsInt = Math.floor(1000/FPS);
+	var aniCnt = 0;
+	var show200 = {row:0,col:0,sprite:getImages("GhoScores"),spNum:0,display:false};
+	var show400 = {row:0,col:0,sprite:getImages("GhoScores"),spNum:1,display:false};
+	var show800 = {row:0,col:0,sprite:getImages("GhoScores"),spNum:2,display:false};
+	var show1600 ={row:0,col:0,sprite:getImages("GhoScores"),spNum:3,display:false};
+	var showFruitScore={row:33,col:26,sprite:getImages("FruitScores"),spNum:0,display:false};
+    var countDown = 0;
+	var eatScore = 200;
+	var MaxLives = 3;
+	var lives = 0;
+	var level = 1;
+	var fruit = 0;
+	var fruitScore = [100,300,500,700,1000,2000,3000,5000];
+	// ============== GAME VARIABLES ==============
+
+	// IMAGE CONTAINING SPRITE MAP
+    var spriteImage = new Image(); spriteImage.src = 'pacman.png';
+    spriteImage.onload = function(){
+        reset();
+    }
+
+	// GAME CANVAS - original pacman is 224x288
+    var canvas = document.getElementById('gameBoard');
+    var ctx = canvas.getContext('2d');
+    ctx.width   = 448;
+    ctx.height  = 576;
+
+	// MAIN DRAWING FUNCTION
+    function drawGameboard() {
+		// CLEAR THE CANVAS
+        ctx.clearRect(0,0, 448,576);
+
+		// BOARD EDGES
+        var show = sprites[boardSprite].show;
+		var Xoff = sprites[boardSprite].images[show][0];
+		var Yoff = sprites[boardSprite].images[show][1];
+		var wide = sprites[boardSprite].width;
+		var high = sprites[boardSprite].height;
+		ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   0,0,   wide,high);
+
+		// WORDS
+		var Xoff = sprites[oneUpSprite].images[0][0];
+		var Yoff = sprites[oneUpSprite].images[0][1];
+		var wide = sprites[oneUpSprite].width;
+		var high = sprites[oneUpSprite].height;
+		ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, 22,0, wide,high);
+
+		var Xoff = sprites[twoUpSprite].images[0][0];
+		var Yoff = sprites[twoUpSprite].images[0][1];
+		var wide = sprites[twoUpSprite].width;
+		var high = sprites[twoUpSprite].height;
+		ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, 344,0, wide,high);
+
+		var Xoff = sprites[hiScrSprite].images[0][0];
+		var Yoff = sprites[hiScrSprite].images[0][1];
+		var wide = sprites[hiScrSprite].width;
+		var high = sprites[hiScrSprite].height;
+		ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, 148,0, wide,high);
+
+		// LIVES
+		for(var i=1; i<lives; ++i) {
+			var Xoff = sprites[livesSprite].images[0][0];
+			var Yoff = sprites[livesSprite].images[0][1];
+			var wide = sprites[livesSprite].width;
+			var high = sprites[livesSprite].height;
+			px = 80-(i*26);
+			py = 540;
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, px,py, wide,high);
+		}
+
+		// FRUIT
+		var Xoff = sprites[fruitSprite].images[fruit][0];
+		var Yoff = sprites[fruitSprite].images[fruit][1];
+		var wide = sprites[fruitSprite].width;
+		var high = sprites[fruitSprite].height;
+		px = 400;
+		py = 540;
+		ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, px,py, wide,high);
+		
+		// SCORES
+		var tmp1UP = Score1UP;
+		pos = 0;
+		do {
+			num = tmp1UP % 10;
+			tmp1UP = Math.floor(tmp1UP/10);
+			var Xoff = sprites[digitSprite].images[num][0];
+			var Yoff = sprites[digitSprite].images[num][1];
+			var wide = sprites[digitSprite].width;
+			var high = sprites[digitSprite].height;
+			px = 80-(pos*16);
+			py = 22;
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, px,py, wide,high);
+			++pos;
+		} while (tmp1UP > 0)
+
+		var tmp2UP = Score2UP;
+		pos = 0;
+		do {
+			num = tmp2UP % 10;
+			tmp2UP = Math.floor(tmp2UP/10);
+			var Xoff = sprites[digitSprite].images[num][0];
+			var Yoff = sprites[digitSprite].images[num][1];
+			var wide = sprites[digitSprite].width;
+			var high = sprites[digitSprite].height;
+			px = 400-(pos*16);
+			py = 22;
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, px,py, wide,high);
+			++pos;
+		} while (tmp2UP > 0)
+
+		var tmpHiS = HighScore;
+		pos = 0;
+		do {
+			num = tmpHiS % 10;
+			tmpHiS = Math.floor(tmpHiS/10);
+			var Xoff = sprites[digitSprite].images[num][0];
+			var Yoff = sprites[digitSprite].images[num][1];
+			var wide = sprites[digitSprite].width;
+			var high = sprites[digitSprite].height;
+			px = 240-(pos*16);
+			py = 22;
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, px,py, wide,high);
+			++pos;
+		} while (tmpHiS > 0)
+		
+		// DOTS
+        ctx.fillStyle = "rgba(251, 203, 155, 1.0)";
+        dots = 0;
+		var showFruit = new Array();
+        var pUPs = new Array();
+        for(var i=0;i<grid.length;++i) {
+            var row = "";
+            for(var j=0; j<grid[i].length; ++j) {
+                switch(grid[i][j]) {
+                    case 0 : break;
+                    case 1 : ++dots; y = 62 + (8*i); x = 14 + (8*j); ctx.fillRect(x,y,4,4); break;
+                    case 2 : ++dots; pUPs.push([i,j]); break;
+                    case 3 : showFruit.push(j); showFruit.push(i); break;
+                    case 4 : break;
+                    case 5 : break;
+                    case 6 : break;
+                    case 7 : break;
+                    case 8 : break;
+                    case 9 : break;
+                
+                }
+            }
+        }
+
+		// SHOW FRUIT
+		if (showFruit.length > 0) {
+			var Xoff = sprites[fruitSprite].images[fruit][0];
+			var Yoff = sprites[fruitSprite].images[fruit][1];
+			var wide = sprites[fruitSprite].width;
+			var high = sprites[fruitSprite].height;
+			px = (8*showFruit[0])-4;
+			py = (8*showFruit[1])+44;
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, px,py, wide,high);
+		}
+		
+        // POWER UPS
+        for(var i=0; i<pUPs.length; ++i) {
+            var sp = powerSprite;
+			var show = sprites[sp].show;
+			var Xoff = sprites[sp].images[show][0];
+			var Yoff = sprites[sp].images[show][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			xStep = pUPs[i][1];
+			yStep = pUPs[i][0];
+			px = (xStep*8) + 4; 
+			py = (yStep*8) + 52; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+        }
+
+        if (GameOver) {
+            var sp = gOverSprite;
+			var Xoff = sprites[sp].images[0][0];
+			var Yoff = sprites[sp].images[0][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			px = 120; 
+			py = 317; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+        }
+        
+		// DEATH OF PACMAN
+		if (!pacObj.alive) {
+			var sp = deathSprite;
+			var show = sprites[sp].show;
+			var Xoff = sprites[sp].images[show][0];
+			var Yoff = sprites[sp].images[show][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			xStep = pacObj.col;
+			yStep = pacObj.row;
+			px = (xStep*8) + pacObj.spX; 
+			py = (yStep*8) + pacObj.spY; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+			return;
+		}
+
+		// READY
+		if (startPause) {
+			var Xoff = sprites[readySprite].images[0][0];
+			var Yoff = sprites[readySprite].images[0][1];
+			var wide = sprites[readySprite].width;
+			var high = sprites[readySprite].height;
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high, 175,317, wide,high);
+		}
+		
+		// PACMAN
+		var sp = pacObj.sprite;
+		var show = sprites[sp].show;
+		var Xoff = sprites[sp].images[show][0];
+		var Yoff = sprites[sp].images[show][1];
+		var wide = sprites[sp].width;
+		var high = sprites[sp].height;
+		if (pacObj.colStep.length > 0) {xStep = pacObj.colStep.pop(); if(startPause) {pacObj.colStep.push(xStep)} } else {xStep = pacObj.col;}
+		if (pacObj.rowStep.length > 0) {yStep = pacObj.rowStep.pop(); if(startPause) {pacObj.rowStep.push(yStep)} } else {yStep = pacObj.row;}
+		px = (xStep*8) + pacObj.spX; 
+		py = (yStep*8) + pacObj.spY; 
+		ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+		
+		// GHOSTS
+		for(var i=0; i<4; ++i) {
+			var sp = ghoObj[i].sprite;
+			var show = sprites[sp].show;
+			var Xoff = sprites[sp].images[show][0];
+			var Yoff = sprites[sp].images[show][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			if (ghoObj[i].colStep.length > 0) {xStep = ghoObj[i].colStep.pop(); if(startPause) {ghoObj[i].colStep.push(xStep)} } else {xStep = ghoObj[i].col;}
+			if (ghoObj[i].rowStep.length > 0) {yStep = ghoObj[i].rowStep.pop(); if(startPause) {ghoObj[i].rowStep.push(yStep)} } else {yStep = ghoObj[i].row;}
+			px = (xStep*8) + ghoObj[i].spX;
+			py = (yStep*8) + ghoObj[i].spY; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+		}
+
+		// EAT FRUIT SCORE
+		if (showFruitScore.display) {
+			var sp = showFruitScore.sprite;
+			var show = showFruitScore.spNum;
+			var Xoff = sprites[sp].images[show][0];
+			var Yoff = sprites[sp].images[show][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			xStep = showFruitScore.col;
+			yStep = showFruitScore.row;
+			px = (xStep*8)-4;
+			py = (yStep*8)+44; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+		}
+		
+		// EAT GHOST SCORE
+		if (show200.display) {
+			var sp = show200.sprite;
+			var show = show200.spNum;
+			var Xoff = sprites[sp].images[show][0];
+			var Yoff = sprites[sp].images[show][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			xStep = show200.col;
+			yStep = show200.row;
+			px = (xStep*8)-4;
+			py = (yStep*8)+44; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+		}
+		if (show400.display) {
+			var sp = show400.sprite;
+			var show = show400.spNum;
+			var Xoff = sprites[sp].images[show][0];
+			var Yoff = sprites[sp].images[show][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			xStep = show400.col;
+			yStep = show400.row;
+			px = (xStep*8)-4;
+			py = (yStep*8)+44; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+		}
+		if (show800.display) {
+			var sp = show800.sprite;
+			var show = show800.spNum;
+			var Xoff = sprites[sp].images[show][0];
+			var Yoff = sprites[sp].images[show][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			xStep = show800.col;
+			yStep = show800.row;
+			px = (xStep*8)-4;
+			py = (yStep*8)+44; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+		}
+		if (show1600.display) {
+			var sp = show1600.sprite;
+			var show = show1600.spNum;
+			var Xoff = sprites[sp].images[show][0];
+			var Yoff = sprites[sp].images[show][1];
+			var wide = sprites[sp].width;
+			var high = sprites[sp].height;
+			xStep = show1600.col;
+			yStep = show1600.row;
+			px = (xStep*8)-4;
+			py = (yStep*8)+44; 
+			ctx.drawImage(spriteImage,   Xoff,Yoff,   wide,high,   px,py,   wide,high);
+		}
+		
+	}
+
+// ================================================================================================================================================
+// ================================================================================================================================================
+	/// ================================= GAME RESET =================================
+    function reset() {
+		if (lives == 0) { // START GAME
+			grid = [];
+			for(var i=0; i<game.length; ++i) { grid[i] = game[i].slice(); }
+			lives = MaxLives;
+            GameOver = false;
+            Score1UP = 0;
+            Score2UP = 0;
+			level = 1;
+		} else if (dots == 0) { // CLEARED LEVEL
+			grid = [];
+			++level;
+			for(var i=0; i<game.length; ++i) { grid[i] = game[i].slice(); }
+		} 		
+ 
+		switch (level) {
+			case 1: // cherry
+				fruit = 0; var ghostSpeed = 8; var pacmanSpeed = 7; var ghostRand = [3,1,5,7]; break;
+			case 2: // strawberry
+				fruit = 1; var ghostSpeed = 8; var pacmanSpeed = 7; var ghostRand = [3,1,4,6]; break;
+			case 3: case 4: // orange
+				fruit = 2; var ghostSpeed = 7; var pacmanSpeed = 6; var ghostRand = [3,1,4,6]; break;
+			case 5: case 6: // apple
+				fruit = 3; var ghostSpeed = 7; var pacmanSpeed = 6; var ghostRand = [2,1,4,6]; break;
+			case 7: case 8: // pineapple
+				fruit = 4; var ghostSpeed = 6; var pacmanSpeed = 5; var ghostRand = [2,1,4,6]; break;
+			case 9: case 10: // Galaxian
+				fruit = 5; var ghostSpeed = 6; var pacmanSpeed = 5; var ghostRand = [2,1,3,4]; break;
+			case 11: case 12: // bell
+				fruit = 6; var ghostSpeed = 5; var pacmanSpeed = 4; var ghostRand = [2,1,3,4]; break;
+			case 13: // key
+				fruit = 7; var ghostSpeed = 5; var pacmanSpeed = 4; var ghostRand = [2,1,2,3]; break;
+			case 14: // key
+				fruit = 7; var ghostSpeed = 4; var pacmanSpeed = 3; var ghostRand = [2,1,2,3]; break;
+			case 15: // key
+				fruit = 7; var ghostSpeed = 3; var pacmanSpeed = 2; var ghostRand = [2,1,2,3]; break;
+			case 16: // key
+				fruit = 7; var ghostSpeed = 2; var pacmanSpeed = 1; var ghostRand = [2,1,2,3]; break;
+			case 16: // key
+				fruit = 7; var ghostSpeed = 2; var pacmanSpeed = 1; var ghostRand = [2,1,2,2]; break;
+			default: // key
+				fruit = 7; var ghostSpeed = 2; var pacmanSpeed = 1; var ghostRand = [1,1,1,1]; break;
+		}
+        
+		var BlinkySprite = getImages("BlinkyL");	
+		var PinkySprite = getImages("PinkyR");	
+		var InkySprite = getImages("InkyL");	
+		var ClydeSprite = getImages("ClydeR");	
+
+		ghoObj[0] = new ghost("Blinky",0   ,21,26,4, 1,1,   ghostRand[0], 0,	true,	ghostSpeed, BlinkySprite); // Blinky - red - bad tempered bossy   
+		ghoObj[1] = new ghost("Pinky" ,40  ,27,22,2, 1,51,  ghostRand[1], 30,	false,	ghostSpeed, PinkySprite); // Pinky - pink - persistent tricky 
+		ghoObj[2] = new ghost("Inky"  ,80  ,27,26,4, 57,1,  ghostRand[2], 40,	false,	ghostSpeed, InkySprite); // Inky - cyan - goofy unpredictable  
+		ghoObj[3] = new ghost("Clyde" ,120 ,27,30,2, 57,51, ghostRand[3], 50,	false,	ghostSpeed, ClydeSprite); // Clyde - orange - ignorant goofy   
+
+		var pacSprite  = getImages("PacR");
+		pacObj = new pacman(45,26,2,2,pacmanSpeed,pacSprite);
+		startPause=true;
+		setTimeout(function(){startPause=false;},2000);
+		RUN=true;
+		sprites[deathSprite].show = 0;
+        main();
+    }
+	/// ================================= GAME RESET =================================
+    
+    /// ================================= MAIN GAME LOOP =================================
+    function main() {
+        if (RUN) requestAnimationFrame(main);
+        
+        var now = Date.now();
+        var delta = now-before;
+		var deltaDots = dots;
+        if (delta > fpsInt) { // ENSURE FPS MAXIMUM
+			aniCnt = (aniCnt+1)%1000;
+            before = now - (delta % fpsInt);
+
+            if (GameOver) {
+				drawGameboard();
+				return;
+            }
+            
+			if (!pacObj.alive) {
+				grid[33][26] = 4; // remove fruit if there
+				animateDeath();
+				drawGameboard();
+				return;
+			}
+
+			if (dots == 0) {
+				animateLevel();
+				drawGameboard();
+				return;
+			}
+            
+            animatePowerUp();
+            
+            animatePacman();
+            if ((pacObj.colStep.length == 0) && pacObj.rowStep.length == 0) {
+                movePacman();
+            }
+            
+            animateGhosts();
+            for(var i=0; i<4; ++i) {
+                if ((ghoObj[i].colStep.length == 0) && ghoObj[i].rowStep.length == 0) {
+                    moveGhost(i);
+                }
+            }
+            
+            drawGameboard();
+        }
+		if ((deltaDots > dots) && ((dots == 160) || (dots == 80))) {
+			grid[33][26] = 3;
+			setTimeout(function(){ grid[33][26] = 4; }, 7000);
+		}
+        
+    }
+    /// ================================= MAIN GAME LOOP =================================
+// ================================================================================================================================================
+
+	// POWER UP FUNCTIONS
+    function powerStart(){
+        clearInterval(powerTime);
+		eatScore = 200;
+        countDown = 32;
+        for(var i=0; i<4; ++i) {
+			if (!ghoObj[i].eaten) {
+				ghoObj[i].runAway = true;
+				ghoObj[i].scout = false;
+			}
+        }
+        powerTime = setTimeout(powerDown,250);
+    }
+    function powerDown() {
+        --countDown;
+        if (countDown > 0) {
+            powerTime = setTimeout(powerDown,250);
+        } else {
+            for(var i=0; i<4; ++i) {
+                ghoObj[i].runAway = false;
+            }
+        }
+    }
+	
+	// POWERUP PELLET ANIMATION
+    function animatePowerUp() {
+		if ((aniCnt % sprites[powerSprite].speed) == 0) {
+			sprites[powerSprite].show = (sprites[powerSprite].show + 1) % sprites[powerSprite].count;
+		}
+    }
+
+    
+	// LEVEL ENDS ANIMATION
+    var flashCount = 0;
+    function animateLevel() {
+		if ((aniCnt % sprites[boardSprite].speed) == 0) {
+			sprites[boardSprite].show = (sprites[boardSprite].show + 1) % sprites[boardSprite].count;
+            ++flashCount;
+		}
+		if (flashCount == 10) {
+			RUN = false;
+            flashCount = 0;
+            reset();
+		}
+    }
+
+	// PACMAN DIES ANIMATION
+    function animateDeath() {
+		if ((aniCnt % sprites[deathSprite].speed) == 0) {
+			sprites[deathSprite].show = (sprites[deathSprite].show + 1) % sprites[deathSprite].count;
+		}
+		if ((RUN) && (sprites[deathSprite].show == (sprites[deathSprite].count-1))) {
+            --lives
+            if (lives == 0) {
+                GameOver = true;
+            } else {
+                RUN = false;
+                setTimeout(reset,1500);
+            }
+		}
+    }
+
+    // PACMAN EATS ANIMATION
+    function animatePacman() {
+		if (startPause) {
+			pacObj.sprite = getImages("PacR");
+			sprites[pacObj.sprite].show = 0;
+			return;
+		}
+		switch (pacObj.dir) {
+			case 4: pacObj.sprite = getImages("PacL"); break;
+			case 1: pacObj.sprite = getImages("PacU"); break;
+			case 2: pacObj.sprite = getImages("PacR"); break;
+			case 3: pacObj.sprite = getImages("PacD"); break;
+		}
+		if ((aniCnt % sprites[pacObj.sprite].speed) == 0) {
+			sprites[pacObj.sprite].show = (sprites[pacObj.sprite].show + 1) % sprites[pacObj.sprite].count;
+		}
+    }
+
+	// GHOST MOVE ANIMATION
+    function animateGhosts() {
+        for(var i=0; i<4; ++i) {
+
+            switch (ghoObj[i].dir) {
+				case 4: ghoObj[i].sprite = getImages(ghoObj[i].name + "L"); break;
+				case 1: ghoObj[i].sprite = getImages(ghoObj[i].name + "U"); break;
+				case 2: ghoObj[i].sprite = getImages(ghoObj[i].name + "R"); break;
+				case 3: ghoObj[i].sprite = getImages(ghoObj[i].name + "D"); break;
+			}
+
+			if (ghoObj[i].runAway) {
+				if ([1,3,5,7,9,11].indexOf(countDown) != -1) { // End of CountDown
+					ghoObj[i].sprite = getImages(ghoObj[i].name + "W");
+				} else {
+					ghoObj[i].sprite = getImages(ghoObj[i].name + "B");
+				}
+			}
+			
+			if (ghoObj[i].eaten) {
+				switch (ghoObj[i].dir) {
+					case 4: ghoObj[i].sprite = getImages(ghoObj[i].name + "EL"); break;
+					case 1: ghoObj[i].sprite = getImages(ghoObj[i].name + "EU"); break;
+					case 2: ghoObj[i].sprite = getImages(ghoObj[i].name + "ER"); break;
+					case 3: ghoObj[i].sprite = getImages(ghoObj[i].name + "ED"); break;
+				}
+			}
+			
+			if ((aniCnt % sprites[ghoObj[i].sprite].speed) == 0) {
+				sprites[ghoObj[i].sprite].show = (sprites[ghoObj[i].sprite].show + 1) % sprites[ghoObj[i].sprite].count;
+			}
+		}
+    }
+    
+	// MOVE PACMAN
+	function movePacman() {
+        
+		switch (pacObj.turn) {
+			case 4: //left 
+				if ([1,2,3,4].indexOf(grid[pacObj.row][pacObj.col-1]) != -1) { pacObj.dir = 4; } break;
+			case 1: //up 
+				if ([1,2,3,4].indexOf(grid[pacObj.row-1][pacObj.col]) != -1) { pacObj.dir = 1; } break;
+			case 2: //right 
+				if ([1,2,3,4].indexOf(grid[pacObj.row][pacObj.col+1]) != -1) { pacObj.dir = 2; } break;
+			case 3: //down 
+				if ([1,2,3,4].indexOf(grid[pacObj.row+1][pacObj.col]) != -1) { pacObj.dir = 3; } break;
+		}
+
+		// SCORING
+		var prevScore = Score1UP;
+		switch(grid[pacObj.row][pacObj.col]) {
+			case 1: Score1UP += 10; break;
+			case 2: Score1UP += 50; powerStart(); break;
+			case 3: 
+				Score1UP += fruitScore[fruit]; 
+				showFruitScore.display = true;
+				showFruitScore.spNum = fruit;
+				setTimeout(function(){showFruitScore.display = false;},750);
+				break;
+		}
+		
+        grid[pacObj.row][pacObj.col] = 4;
+        
+		if (HighScore < Score1UP) {
+			HighScore = Score1UP;
+		}
+		if ((prevScore < 10000) && (Score1UP >= 10000)) {
+			++lives;
+		}
+		
+		// COLLISION
+        for(var i=0; i<4; ++i) {
+            if ((ghoObj[i].row == pacObj.row) && (ghoObj[i].col == pacObj.col)) { // caught GHOST
+                collide(i);
+            }
+        }
+        
+		switch (pacObj.dir) {
+			case 4: //left
+                if ([1,2,3,4].indexOf(grid[pacObj.row][pacObj.col-1]) != -1) { 
+					for(var i=pacObj.col-1; i<pacObj.col; i+=(1/pacObj.speed)) { pacObj.colStep.push(i); }
+					pacObj.col -= 1; 
+				} if (pacObj.col < 1) { pacObj.col = 51; } break;
+			case 1: //up 
+				if ([1,2,3,4].indexOf(grid[pacObj.row-1][pacObj.col]) != -1) { 
+					for(var i=pacObj.row-1; i<pacObj.row; i+=(1/pacObj.speed)) { pacObj.rowStep.push(i); }
+					pacObj.row -= 1;
+				} break;
+			case 2: //right 
+                if ([1,2,3,4].indexOf(grid[pacObj.row][pacObj.col+1]) != -1) { 
+					for(var i=pacObj.col+1; i>pacObj.col; i-=(1/pacObj.speed)) { pacObj.colStep.push(i); }
+					pacObj.col += 1;
+				} if (pacObj.col > 51) { pacObj.col = 1; } break;
+			case 3: //down 
+				if ([1,2,3,4].indexOf(grid[pacObj.row+1][pacObj.col]) != -1) { 
+					for(var i=pacObj.row+1; i>pacObj.row; i-=(1/pacObj.speed)) { pacObj.rowStep.push(i); }
+					pacObj.row += 1;
+				} break;
+		}
+	
+	}
+
+    // MOVE GHOST AI
+    function moveGhost(x) {
+        var left = -1;
+        var right= -1;
+        var up   = -1;
+        var down = -1;
+        var goL = [1,2,4];
+        var goR = [1,2,4];
+        var goU = [1,2,4];
+        var goD = [1,2,4];
+        
+		var toCol = pacObj.col;
+        var toRow = pacObj.row;
+        var rand = ghoObj[x].random;
+        
+        if ((ghoObj[x].row == ghoObj[x].toRow) && (ghoObj[x].col == ghoObj[x].toCol)) {
+            ghoObj[x].scout = false;
+        }
+        if (ghoObj[x].scout) {
+            toCol = ghoObj[x].toCol;
+            toRow = ghoObj[x].toRow;
+            rand = 1;
+        }
+
+        if (ghoObj[x].homeTime > 1) {
+            --ghoObj[x].homeTime;
+        }
+        if (ghoObj[x].homeTime == 1) {
+            if ((ghoObj[x].row == 21) && (ghoObj[x].col == 26)) {
+                ghoObj[x].homeTime = 0;
+            } else {
+                ghoObj[x].out = true;
+                goL = [1,2,4,5];
+                goR = [1,2,4,5];
+                goU = [1,2,4,5];
+                toCol = 26;
+                toRow = 21;
+                rand = 1;
+            }
+        }
+        
+        
+        if ((ghoObj[x].row == 26) && (ghoObj[x].col == 26)) {
+            ghoObj[x].eaten = false;
+            ghoObj[x].homeTime = 1;
+        }
+        if (ghoObj[x].eaten) {
+            goD = [1,2,4,5];
+            toCol = 26;
+            toRow = 26;
+            rand = 1;
+        } else if (ghoObj[x].runAway) {
+            toCol = (pacObj.col < 26) ? 51 : 1;
+            toRow = (pacObj.row < 28) ? 57 : 1;
+        }
+        
+		// left
+		if (goL.indexOf(grid[ghoObj[x].row][ghoObj[x].col-1]) != -1) { 
+			if (ghoObj[x].col > toCol) {
+				left = 3; if (ghoObj[x].dir%2 == 1) {++left;} // encourage 90deg turn
+			} else if (ghoObj[x].col < toCol) {
+				left = 1;
+			} else {
+				left = 2;
+			}
+		} else { left = -1; } 
+		// right
+		if (goR.indexOf(grid[ghoObj[x].row][ghoObj[x].col+1]) != -1) { 
+			if (ghoObj[x].col < toCol) {
+				right = 3; if (ghoObj[x].dir%2 == 1) {++right;} // encourage 90deg turn
+			} else if (ghoObj[x].col > toCol) {
+				right = 1;
+			} else {
+				right = 2;
+			}
+		} else { right = -1; }
+		// up
+		if (goU.indexOf(grid[ghoObj[x].row-1][ghoObj[x].col]) != -1) { 
+			if (ghoObj[x].row > toRow) {
+				up = 3; if (ghoObj[x].dir%2 == 0) {++up;} // encourage 90deg turn
+			} else if (ghoObj[x].row < toRow) {
+				up = 1;
+			} else {
+				up = 2;
+			}
+		} else { up = -1; } 
+		// down
+		if (goD.indexOf(grid[ghoObj[x].row+1][ghoObj[x].col]) != -1) { 
+			if (ghoObj[x].row < toRow) {
+				down = 3; if (ghoObj[x].dir%2 == 0) {++down;} // encourage 90deg turn
+			} else if (ghoObj[x].row > toRow) {
+				down = 1;
+			} else {
+				down = 2;
+			}
+		} else { down = -1; } 
+		
+		// cant change directions mid stream
+		if ((ghoObj[x].dir == 4) && (left > 0)  && (up < 2)    && (down < 2)) {right = -1;}
+		if ((ghoObj[x].dir == 2) && (right > 0) && (up < 2)    && (down < 2)) {left = -1;}
+		if ((ghoObj[x].dir == 1) && (up > 0)    && (right < 2) && (left < 2)) {down = -1;}
+		if ((ghoObj[x].dir == 3) && (down > 0)  && (right < 2) && (left < 2)) {up = -1;}
+		
+		var LostChance = Math.floor(Math.random() * rand) + 1;
+		var LostDirection = Math.floor(Math.random() * 4) + 1;
+		if (LostChance > 1) {
+			switch (LostDirection) {
+				case 4: left  *= 5; break;
+				case 1: up    *= 5; break;
+				case 2: right *= 5; break;
+				case 3: down  *= 5; break;
+			}
+		}
+
+        // only UP and DOWN at HOME
+        if (!ghoObj[x].out) {
+            left = -1;
+            right = -1;
+        }    
+        
+        // Go in BEST direction to catch PACMAN
+        var toVal = 0;
+        if ((left > toVal) &&(left > 0))  { toVal = left;  ghoObj[x].dir = 4; } // TEST LEFT
+        if ((up > toVal)   &&(up > 0))    { toVal = up;    ghoObj[x].dir = 1; } // TEST UP
+        if ((right > toVal)&&(right > 0)) { toVal = right; ghoObj[x].dir = 2; } // TEST RIGHT
+        if ((down > toVal) &&(down > 0))  { toVal = down;  ghoObj[x].dir = 3; } // TEST DOWN
+
+		// COLLISION
+        if ((ghoObj[x].row == pacObj.row) && (ghoObj[x].col == pacObj.col)) { // caught PACMAN
+            collide(x);
+        }
+
+		switch (ghoObj[x].dir) {
+			case 4: //left 
+                if (goL.indexOf(grid[ghoObj[x].row][ghoObj[x].col-1]) != -1) {
+                    for(var i=ghoObj[x].col-1; i<ghoObj[x].col; i+=(1/ghoObj[x].speed)) { ghoObj[x].colStep.push(i); }
+                    ghoObj[x].col -= 1;
+                } 
+                if (ghoObj[x].col < 1) { ghoObj[x].col = 51; } // tunnel
+				break;
+			case 2: //right 
+                if (goR.indexOf(grid[ghoObj[x].row][ghoObj[x].col+1]) != -1) {
+                    for(var i=ghoObj[x].col+1; i>ghoObj[x].col; i-=(1/ghoObj[x].speed)) { ghoObj[x].colStep.push(i); }
+                    ghoObj[x].col += 1;
+                } 
+                if (ghoObj[x].col > 51) { ghoObj[x].col = 1; } // tunnel
+				break;
+			case 1: //up 
+                if (goU.indexOf(grid[ghoObj[x].row-1][ghoObj[x].col]) != -1) {
+                    for(var i=ghoObj[x].row-1; i<ghoObj[x].row; i+=(1/ghoObj[x].speed)) { ghoObj[x].rowStep.push(i); }
+                    ghoObj[x].row -= 1;
+                }
+				break;
+			case 3: //down 
+                if (goD.indexOf(grid[ghoObj[x].row+1][ghoObj[x].col]) != -1) {
+                    for(var i=ghoObj[x].row+1; i>ghoObj[x].row; i-=(1/ghoObj[x].speed)) { ghoObj[x].rowStep.push(i); }
+                    ghoObj[x].row += 1;
+                }
+				break;
+		}
+        
+		// slow ghost in tunnel
+		if ((ghoObj[x].row == 27) && ((ghoObj[x].col < 10)||(ghoObj[x].col > 42)) ) {
+			ghoObj[x].speed = ghoObj[x].saveSpeed + Math.floor(ghoObj[x].saveSpeed*.8);
+        // slow ghost running away    
+		} else if (ghoObj[x].runAway) {
+			ghoObj[x].speed = ghoObj[x].saveSpeed + Math.floor(ghoObj[x].saveSpeed*.6);
+        // fast ghost going home    
+		} else if (ghoObj[x].eaten) {
+			ghoObj[x].speed = Math.ceil(ghoObj[x].saveSpeed/4);
+		} else {
+			ghoObj[x].speed = ghoObj[x].saveSpeed;
+		}
+        
+    }
+
+	// PACMAN + GHOST = ????
+    function collide(x) {
+		if (ghoObj[x].eaten) {return;}
+		if (ghoObj[x].runAway) {
+
+			switch(eatScore) {
+				case 200: 
+					show200.col = ghoObj[x].col;
+					show200.row = ghoObj[x].row;
+					show200.display = true;
+					setTimeout(function(){show200.display = false;},500);
+					break;
+				case 400: 
+					show400.col = ghoObj[x].col;
+					show400.row = ghoObj[x].row;
+					show400.display = true;
+					setTimeout(function(){show400.display = false;},500);
+					break;
+				case 800: 
+					show800.col = ghoObj[x].col;
+					show800.row = ghoObj[x].row;
+					show800.display = true;
+					setTimeout(function(){show800.display = false;},500);
+					break;
+				case 1600: 
+					show1600.col = ghoObj[x].col;
+					show1600.row = ghoObj[x].row;
+					show1600.display = true;
+					setTimeout(function(){show1600.display = false;},500);
+					break;
+			}	
+
+			ghoObj[x].eaten=true;
+			ghoObj[x].speed = Math.ceil(ghoObj[x].saveSpeed/3);
+			ghoObj[x].runAway=false;
+			ghoObj[x].homeTime=0;
+			ghoObj[x].out=true;
+			ghoObj[x].colStep = [];
+			ghoObj[x].rowStep = [];
+			Score1UP += eatScore;
+			eatScore *= 2;
+			
+		} else {
+			pacObj.alive=false;
+		} 
+    }
+
+	// KEYBOARD
+	$(document).keydown(function(e){
+		var code = e.which;
+		switch(code) {
+			case 49: level=1; reset(); break; //cherry
+			case 50: level=2; reset(); break; //strawberry
+			case 51: level=3; reset(); break; //orange
+			case 52: level=5; reset(); break; //apple
+			case 53: level=7; reset(); break; //pineapple
+			case 54: level=9; reset(); break; //Galaxian
+			case 55: level=11; reset(); break; //bell
+			case 56: level=13; reset(); break; //key
+            
+			case 37: pacObj.turn = 4; break; //left
+			case 38: pacObj.turn = 1; break; //up
+			case 39: pacObj.turn = 2; break; //right
+			case 40: pacObj.turn = 3; break; //down
+			case 32: if (GameOver) { reset(); } break;
+			case 13: lives=0; reset(); break;
+			case 80: RUN = !RUN; main(); break; // Pause Toggle
+			default: return;
+		}
+		e.preventDefault(); 
+	});
+
+    
+});   
+</script>
+
+</head>
+<body>
+  <canvas id="gameBoard" width=448 height=576></canvas>
+</body>
+</html>
+
+<!---
+	dot = 10;
+	powerUp = 50;
+	ghost1 = 200;
+	ghost1 = 400;
+	ghost1 = 800;
+	ghost1 = 1600;
+
+	The cherry is worth 100 points. It appears during the first level of game play
+	The strawberry is worth 300 points. It appears during the second level of game play
+	The orange is worth 500 points. It appears during the third and fourth level of game play
+	The apple is worth 700 points. It appears during the fifth and sixth level of game play
+	The pineapple is worth 1,000 points. It appears during the seventh and eighth level of game play
+	The Galaxian spaceship is worth 2,000 points. It appears during the ninth and tenth level of game play
+	The bell is worth 3,000 points. It appears during the eleventh and twelfth level of game play
+	The key is worth 5,000 points. It appears during the thirdteenth and all subsequent levels of game play	
+	
+--->
+
